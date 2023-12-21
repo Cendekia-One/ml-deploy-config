@@ -10,9 +10,6 @@ import requests
 import tempfile
 
 storage_uri = os.getenv('STORAGE_URI')
-connection_string = os.getenv('DATABASE_URI')
-connection = pyodbc.connect(connection_string)
-cursor = connection.cursor()
 
 def util_summary(model_name, text):
     model = tf.keras.models.load_model(f'models/{model_name}.h5')

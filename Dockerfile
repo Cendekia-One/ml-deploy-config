@@ -8,14 +8,14 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y git
 
+# Copy the local folder into the container
+COPY . /app
+
 # Install ODBC drivers for SQL Server
 RUN apt-get install -y --no-install-recommends \
     unixodbc \
     unixodbc-dev \
     && rm -rf /var/lib/apt/lists/*
-
-# Clone the GitHub repository into the container
-RUN git clone https://github.com/Topi-Batu/ml-deployment /app
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
