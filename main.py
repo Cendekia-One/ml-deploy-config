@@ -12,14 +12,14 @@ def read_root():
 
 # Text Summary models name is text_summary.h5
 @app.get("/summary")
-async def predict_summary(request: Request):
+async def predict_summary(text: Request):
     data = await request.json()
     text = data["text"]
     return text_summary(text=text)
 
 # Text Category models name is text_category.h5
 @app.get("/category")
-async def predict_category(request: Request):
+async def predict_category(text: Request):
     data = await request.json()
     text = data["text"]
     return text_category(text=text)

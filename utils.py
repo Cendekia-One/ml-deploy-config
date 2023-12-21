@@ -8,7 +8,6 @@ import os
 from io import StringIO, BytesIO
 import requests
 import tempfile
-
 storage_uri = os.getenv('STORAGE_URI')
 
 def util_summary(model_name, text):
