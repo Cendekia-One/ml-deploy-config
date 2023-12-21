@@ -1,0 +1,4 @@
+__pycache__
+.idea
+flask
+models/text_categorization.h5
