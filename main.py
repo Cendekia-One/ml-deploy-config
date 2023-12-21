@@ -1,25 +1,45 @@
-from fastapi import FastAPI, Request
-from utils import util_dua, get_commodities
-from text_process import text_summary, text_category
-from typing import List
-import json
+from fastapi import FastAPI, HTTPException, Request
+from pydantic import BaseModel
+import tensorflow as tf
+import numpy as np
 
 app = FastAPI()
 
+# Load the model during startup
+model = tf.keras.models.load_model('models/SavedModel')
+
+class TextRequest(BaseModel):
+    text: str
+
+class TextResponse(BaseModel):
+    top3_strings: list
+    top3_probabilities: list
+    over_0_5_strings: list
+    over_0_5_probabilities: list
+
 @app.get("/")
-def read_root():
-    return 'Cendekiaone Machine Learning API'
 
-# Text Summary models name is text_summary.h5
-@app.get("/summary")
-async def predict_summary(text: Request):
-    data = await request.json()
-    text = data["text"]
-    return text_summary(text=text)
+@app.post("/predict")
+async def predict_category(request: Request, text_request: TextRequest):
+    text = text_request.text
+    predictions = model.predict([text])
 
-# Text Category models name is text_category.h5
-@app.get("/category")
-async def predict_category(text: Request):
-    data = await request.json()
-    text = data["text"]
-    return text_category(text=text)
+    subdisciplines_array = ['law', 'philosophy', 'religious studies', 'anthropology', 'archaeology and history', 'economics', 'earth science', 'psychology', 'sociology', 'biology', 'chemistry', 'astronomy', 'physics', 'computer science', 'software development', 'mathematics', 'agriculture', 'architecture', 'business and entrepreneurship', 'education', 'engineering and technology', 'environmental studies and forestry', 'journalism, media studies and communication', 'medicine and health', 'military sciences', 'public policy and administration', 'social work', 'transportation', 'climate change', 'finance', 'inspiration', 'marketing', 'gender studies', 'art', 'data science', 'artificial intelligence', 'spirituality', 'parenting', 'creativity', 'travel', 'social media', 'leadership', 'music', 'cryptocurrency', 'design', 'relationships', 'personal development', 'professional development', 'political science', 'linguistics, languages and literature', 'human physical performance and recreation']
+
+    top_indices = np.argsort(predictions[0])[::-1]
+    top3_probabilities = np.array(predictions)[0][top_indices]
+
+    over_0_5_indices = np.where(predictions > 0.5)[1]
+    over_0_5_probabilities = np.array(predictions)[0][over_0_5_indices]
+
+    over_0_5_strings = np.array(subdisciplines_array)[over_0_5_indices]
+    top3_strings = np.array(subdisciplines_array)[top_indices]
+
+    response_data = {
+        "top3_strings": top3_strings.tolist(),
+        "top3_probabilities": top3_probabilities.tolist(),
+        "over_0_5_strings": over_0_5_strings.tolist(),
+        "over_0_5_probabilities": over_0_5_probabilities.tolist()
+    }
+
+    return TextResponse(**response_data)

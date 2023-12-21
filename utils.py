@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 import pyodbc
 from tensorflow.keras.utils import get_file
+from tensorflow.keras.models import load_model
+
 from fastapi import HTTPException
 import os
 from io import StringIO, BytesIO
@@ -38,7 +40,7 @@ def util_summary(model_name, text):
     print("Probability:", over_0_5_probabilities)
     return predictions
 def util_category(model_name, text):
-    model = tf.keras.models.load_model(f'models/{model_name}.h5')
+    model = tf.keras.models.load_model(f'models/{model_name}')
     ## Ini command buat masukin input text, dan modelnya bakal keluarin output "predictions"
     predictions = model.predict([text])
     print(predictions) # Print keluaran model
