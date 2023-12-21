@@ -12,12 +12,14 @@ class TextRequest(BaseModel):
     text: str
 
 class TextResponse(BaseModel):
-    top3_strings: list
-    top3_probabilities: list
-    over_0_5_strings: list
-    over_0_5_probabilities: list
+    subcategory: list
+    # top3_probabilities: list
+    # over_0_5_strings: list
+    # over_0_5_probabilities: list
 
 @app.get("/")
+def read_root():
+    return 'Cendekiaone Machine Learning API'
 
 @app.post("/predict")
 async def predict_category(request: Request, text_request: TextRequest):
@@ -29,17 +31,17 @@ async def predict_category(request: Request, text_request: TextRequest):
     top_indices = np.argsort(predictions[0])[::-1]
     top3_probabilities = np.array(predictions)[0][top_indices]
 
-    over_0_5_indices = np.where(predictions > 0.5)[1]
-    over_0_5_probabilities = np.array(predictions)[0][over_0_5_indices]
+    # over_0_5_indices = np.where(predictions > 0.5)[1]
+    # over_0_5_probabilities = np.array(predictions)[0][over_0_5_indices]
 
-    over_0_5_strings = np.array(subdisciplines_array)[over_0_5_indices]
-    top3_strings = np.array(subdisciplines_array)[top_indices]
+    # over_0_5_strings = np.array(subdisciplines_array)[over_0_5_indices]
+    subcategory = np.array(subdisciplines_array)[top_indices]
 
     response_data = {
-        "top3_strings": top3_strings.tolist(),
-        "top3_probabilities": top3_probabilities.tolist(),
-        "over_0_5_strings": over_0_5_strings.tolist(),
-        "over_0_5_probabilities": over_0_5_probabilities.tolist()
+        "subcategory": subcategory.tolist(),
+        # "top_probabilities": top3_probabilities.tolist(),
+        # "over_0_5_strings": over_0_5_strings.tolist(),
+        # "over_0_5_probabilities": over_0_5_probabilities.tolist()
     }
 
     return TextResponse(**response_data)
